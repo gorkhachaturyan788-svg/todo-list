@@ -1,62 +1,25 @@
 import React, { useEffect, useState } from "react";
 import TodoForm from "./components/TodoForm";
 import TodoList from "./components/TodoList";
+import './App.css';
 
 function App() {
-  const [todos, setTodos] = useState(function() {
-    const saved = localStorage.getItem("todos");
-    if (saved) {
-      return JSON.parse(saved);
-    } else {
-      return [];
-    }
-  });
+  const [todos, setTodos] = useState(() => JSON.parse(localStorage.getItem("todos")) || []);
 
-  useEffect(function() {
+  useEffect(() => {
     localStorage.setItem("todos", JSON.stringify(todos));
   }, [todos]);
 
-  function addTodo(text) {
-    const newTodo = {
-      id: Date.now(),
-      text: text,
-      completed: false
-    };
-
-    const newTodos = [...todos, newTodo];
-    setTodos(newTodos);
-  }
-
-  function deleteTodo(id) {
-    const filtered = todos.filter(function(todo) {
-      return todo.id !== id;
-    });
-    setTodos(filtered);
-  }
-
-  function changeTodo(id) {
-    const updated = todos.map(function(todo) {
-      if (todo.id === id) {
-        return {
-          ...todo,
-          completed: !todo.completed
-        };
-      } else {
-        return todo;
-      }
-    });
-    setTodos(updated);
-  }
+  const addTodo = (text) => setTodos([...todos, { id: Date.now(), text, completed: false }]);
+  const deleteTodo = (id) => setTodos(todos.filter(t => t.id !== id));
+  const changeTodo = (id) => setTodos(todos.map(t => t.id === id ? { ...t, completed: !t.completed } : t));
+  const updateTodo = (id, newText) => setTodos(todos.map(t => t.id === id ? { ...t, text: newText } : t));
 
   return (
-    <div style={{ maxWidth: "500px", margin: "50px auto", fontFamily: "sans-serif", padding: "0 20px" }}>
-      <h1 style={{ fontSize: "28px", marginBottom: "20px" }}>Todo App</h1>
+    <div className="app-container">
+      <h1>Todo App</h1>
       <TodoForm addTodo={addTodo} />
-      <TodoList
-        todos={todos}
-        deleteTodo={deleteTodo}
-        changeTodo={changeTodo}
-      />
+      <TodoList todos={todos} deleteTodo={deleteTodo} changeTodo={changeTodo} updateTodo={updateTodo} />
     </div>
   );
 }
